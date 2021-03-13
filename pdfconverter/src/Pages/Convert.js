@@ -153,7 +153,19 @@ export const Convert = () => {
                                         </aside>
                                     </div >
 
-
+                                    <div className="pt-10 pl-3 ">
+                                        <div className="input-group mt-3 mb-3">
+                                            <label className="my-4 text-3xl md:text-2xl mr-3 text-white opacity-75 font-bold leading-tight text-center md:text-left" for="inputGroupSelect01">Convert To :{" "}</label>
+                                            <select className="form-select shadow appearance-none border w-max rounded mr-6 p-3 text-gray-700 leading-tight focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                                                name="convertFunc" onChange={convertType} id="convertpdftype">
+                                                <option selected>Choose the formate to convert...</option>
+                                                <option value="pdf2jpg">Jpeg</option>
+                                                <option value="pdf2png">Png</option>
+                                                <option value="pdf2txt">Txt</option>
+                                                <option value="pdf2html">Html</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-3 px-8 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
                                         type="submit" onClick={onSubmit}>
                                         Convert
