@@ -25,6 +25,82 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 
 ########################################################################################################################
+# Crop
+########################################################################################################################
+
+
+@app.route('/crop/download/<filename>', methods=['GET', 'POST'])
+def return_files_crop(filename):
+    file_path = './crop/'+filename
+    return send_file(file_path, as_attachment=True, attachment_filename='', cache_timeout=0)
+
+
+@app.route('/crop/upload/preview/<filename>', methods=['GET', 'POST'])
+def return_preview_img(filename):
+    print(filename)
+    file_path = './crop/'+filename
+    return send_file(file_path, as_attachment=True, attachment_filename='', cache_timeout=0)
+
+
+uploadCropFile = []
+
+
+@app.route('/crop/upload/change', methods=['GET', 'POST'])
+def crop():
+    crop = request.json
+    width = crop['width']
+    height = crop['height']
+    x = crop['x']
+    y = crop['y']
+    reader = PyPDF2.PdfFileReader('./uploads/'+uploadCropFile[0], 'rb')
+    page = reader.getPage(0)
+    print(page.cropBox.getLowerLeft())
+    print(page.cropBox.getUpperLeft())
+    print(page.cropBox.getUpperRight())
+    print(page.cropBox.getLowerRight())
+    cropFilename = "crop-"+str(random.randint(100000, 900000)) + ".pdf"
+    writer = PyPDF2.PdfFileWriter()
+    for i in range(reader.getNumPages()):
+        page = reader.getPage(i)
+        if width != 0:
+            page.cropBox.setLowerLeft((x, y))
+        if height != 0:
+            page.cropBox.setUpperRight(
+                (int(width), int(height)))
+        writer.addPage(page)
+    outstream = open('./crop/'+cropFilename, 'wb')
+    writer.write(outstream)
+    outstream.close()
+    return cropFilename
+
+
+@app.route('/crop/upload', methods=['POST'])
+def crop_preview():
+    if request.method == 'POST':
+        fname = ''
+        file = request.files.get('file')
+        if file:
+            filename = secure_filename(file.filename)
+            uploadCropFile.append(filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            images = convert_from_path('./uploads/' + filename)
+            for i, image in enumerate(images):
+                if i == 0:
+                    fname = "image" + \
+                        str(random.randint(100000, 900000)) + ".png"
+                    fullfname = './crop/'+fname
+                    image.save(fullfname, "PNG")
+                    return fname
+                else:
+                    break
+                return ""
+    return ""
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+
+########################################################################################################################
 # Convert
 ########################################################################################################################
 
