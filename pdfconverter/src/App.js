@@ -3,7 +3,6 @@ import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import './App.css';
-import backImg from "./Static/image/header.png";
 import { Buttons } from "./Components/Buttons";
 import { Rotate } from "./Pages/Rotate";
 import { Crop } from "./Pages/Crop";
