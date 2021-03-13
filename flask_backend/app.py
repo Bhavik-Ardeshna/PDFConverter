@@ -20,6 +20,45 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+########################################################################################################################
+# Merge
+########################################################################################################################
+pdfarr = []
+
+
+@app.route('/merge/download/<filename>', methods=['GET', 'POST'])
+def return_files_merge(filename):
+    file_path = './merged/'+filename
+    return send_file(file_path, as_attachment=True, attachment_filename='', cache_timeout=0)
+
+
+@app.route('/merge/combine', methods=['GET', 'POST'])
+def PDFmerge():
+    merger = PyPDF2.PdfFileMerger()
+    for pdf in pdfarr:
+        merger.append(pdf)
+
+    merge_file_name = 'merge' + \
+        str(random.randint(100000, 900000))+'.pdf'
+    merger.write("merged/"+merge_file_name)
+    merger.close()
+    pdfarr.clear()
+    return merge_file_name
+
+
+@app.route('/merge/upload', methods=['POST'])
+def merge():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        pdfarr.append('./uploads/'+filename)
+        return ""
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
 
 ########################################################################################################################
 # Split
