@@ -21,13 +21,31 @@ cd PDFConverter
 ```
 
 ## Installation and Running Locally
+> **Step to Create Env**
+```
+cd flask_backend
+python3 -m venv env
+```
 
 > **Step to run Flask Backend**
 
 ```sh
-cd flask_backend
 pip3 install requirements.txt
 python3 app.py
+```
+
+> **Create Folders inside Flask Backend with name**
+```
+crop
+pdf2html
+pdf2png
+pdf2jpg
+pdf2text
+merged
+rotated
+split
+uploads
+zip
 ```
 
 > **Step to run ReactJS**
