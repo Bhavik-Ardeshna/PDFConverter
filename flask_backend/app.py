@@ -4,14 +4,17 @@ import random
 from flask import Flask, flash, request, redirect, send_file, render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
+
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import HTMLConverter, TextConverter, XMLConverter
 from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
+
 from pdf2image import convert_from_path
 
-from create_zip import *
 import PyPDF2
+
+from create_zip import *
 
 
 UPLOAD_FOLDER = './uploads'
@@ -19,6 +22,155 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+
+########################################################################################################################
+# Convert
+########################################################################################################################
+
+@app.route('/convert/download/<filename>', methods=['GET', 'POST'])
+def return_files_convert(filename):
+    file_path = './zip/'+filename
+    return send_file(file_path, as_attachment=True, attachment_filename='', cache_timeout=0)
+
+
+def convert_func(case, fname, pages=None):
+    if not pages:
+        pagenums = set()
+    else:
+        pagenums = set(pages)
+    manager = PDFResourceManager()
+    codec = 'utf-8'
+    caching = True
+
+    if case == 'text':
+        output = io.StringIO()
+        converter = TextConverter(
+            manager, output, codec=codec, laparams=LAParams())
+    if case == 'HTML':
+        output = io.BytesIO()
+        converter = HTMLConverter(
+            manager, output, codec=codec, laparams=LAParams())
+
+    interpreter = PDFPageInterpreter(manager, converter)
+    infile = open(fname, 'rb')
+
+    for page in PDFPage.get_pages(infile, pagenums, caching=caching, check_extractable=True):
+        interpreter.process_page(page)
+
+    convertedPDF = output.getvalue()
+    infile.close()
+    converter.close()
+    output.close()
+    return convertedPDF
+
+
+def Pdf2html(pdf):
+    convertedPDF = convert_func('HTML', './uploads/'+pdf)
+    fileConverted = open('./pdf2html/change_html.html', "wb")
+    fileConverted.write(convertedPDF)
+    fileConverted.close()
+
+
+def Pdf2txt(pdf):
+    convertedPDF = convert('text', './uploads/'+pdf)
+    fileConverted = open('./pdf2txt/text.txt', "w")
+    fileConverted.write(convertedPDF)
+    fileConverted.close()
+
+
+def Pdf2Png(pdf):
+    images = convert_from_path('./uploads/' + pdf)
+    for i, image in enumerate(images):
+        fname = "./pdf2png/image" + str(i) + ".png"
+        image.save(fname, "PNG")
+
+
+def Pdf2Jpg(pdf):
+    images = convert_from_path('./uploads/' + pdf)
+    for i, image in enumerate(images):
+        fname = "./pdf2jpg/image" + str(i) + ".jpg"
+        image.save(fname, "JPEG")
+
+
+@app.route('/convert/upload', methods=['POST'])
+def convert():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        typeToConvert = request.form.get('pdfconverttype')
+        # typeToConvert = 'pdf2jpg'
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        if str(typeToConvert) == 'pdf2jpg':
+            Pdf2Jpg(filename)
+            create_zip('pdf2jpg')
+            zipfilename = 'pdf2jpg.zip'
+            return zipfilename
+
+        if str(typeToConvert) == 'pdf2png':
+            Pdf2Png(filename)
+            create_zip('pdf2png')
+            zipfilename = 'pdf2png.zip'
+            return zipfilename
+
+        if str(typeToConvert) == 'pdf2txt':
+            Pdf2txt(filename)
+            create_zip('pdf2txt')
+            zipfilename = 'pdf2txt.zip'
+            return zipfilename
+
+        if str(typeToConvert) == 'pdf2html':
+            Pdf2html(filename)
+            create_zip('pdf2html')
+            zipfilename = 'pdf2html.zip'
+            return zipfilename
+    return ""
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+
+########################################################################################################################
+# Merge
+########################################################################################################################
+pdfarr = []
+
+
+@app.route('/merge/download/<filename>', methods=['GET', 'POST'])
+def return_files_merge(filename):
+    file_path = './merged/'+filename
+    return send_file(file_path, as_attachment=True, attachment_filename='', cache_timeout=0)
+
+
+@app.route('/merge/combine', methods=['GET', 'POST'])
+def PDFmerge():
+    merger = PyPDF2.PdfFileMerger()
+    for pdf in pdfarr:
+        merger.append(pdf)
+
+    merge_file_name = 'merge' + \
+        str(random.randint(100000, 900000))+'.pdf'
+    merger.write("merged/"+merge_file_name)
+    merger.close()
+    pdfarr.clear()
+    return merge_file_name
+
+
+@app.route('/merge/upload', methods=['POST'])
+def merge():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        pdfarr.append('./uploads/'+filename)
+        return ""
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
 
 
 ########################################################################################################################
