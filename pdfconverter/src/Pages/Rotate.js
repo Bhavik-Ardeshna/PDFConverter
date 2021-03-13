@@ -174,13 +174,16 @@ export const Rotate = () => {
                                     </div>
 
                                 </form>
-                                {returnFile ? (
+                                <div className="my-12">
 
-                                    <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-3 px-8 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
-                                        type="submit" onClick={downloadFile}>
-                                        Download
-                                    </button>
-                                ) : null}
+                                    {returnFile ? (
+
+                                        <button className="bg-gradient-to-r from-purple-800 to-green-500 hover:from-pink-500 hover:to-green-500 text-white font-bold py-3 px-8 rounded focus:ring transform transition hover:scale-105 duration-300 ease-in-out"
+                                            type="submit" onClick={downloadFile}>
+                                            Download
+                                        </button>
+                                    ) : null}
+                                </div>
                             </div>
 
                         </Fragment>
