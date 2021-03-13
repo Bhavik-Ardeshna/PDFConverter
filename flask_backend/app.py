@@ -4,14 +4,17 @@ import random
 from flask import Flask, flash, request, redirect, send_file, render_template
 from werkzeug.utils import secure_filename
 from flask import send_from_directory
+
 from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import HTMLConverter, TextConverter, XMLConverter
 from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
+
 from pdf2image import convert_from_path
 
-from create_zip import *
 import PyPDF2
+
+from create_zip import *
 
 
 UPLOAD_FOLDER = './uploads'
@@ -56,7 +59,6 @@ def convert_func(case, fname, pages=None):
         interpreter.process_page(page)
 
     convertedPDF = output.getvalue()
-
     infile.close()
     converter.close()
     output.close()
@@ -124,6 +126,7 @@ def convert():
             zipfilename = 'pdf2html.zip'
             return zipfilename
     return ""
+
 
 ########################################################################################################################
 ########################################################################################################################
