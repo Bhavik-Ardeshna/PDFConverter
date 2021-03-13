@@ -22,6 +22,70 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 
 ########################################################################################################################
+# Split
+########################################################################################################################
+
+
+@app.route('/split/download/<filename>', methods=['GET', 'POST'])
+def return_files_split(filename):
+    file_path = './split/'+filename
+    return send_file(file_path, as_attachment=True, attachment_filename='', cache_timeout=0)
+
+
+@app.route('/split/upload', methods=['POST'])
+def split():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        from_page = request.form.get('from')
+        to_page = request.form.get('to')
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        pdfFileObj = open('./uploads/'+filename, 'rb')
+
+        # creating pdf reader object
+        pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+
+        # starting index of first slice
+        start = 0
+
+        # starting index of last slice
+        end = int(from_page)-1
+
+        for i in range(3):
+            # creating pdf writer object for (i+1)th split
+            pdfWriter = PyPDF2.PdfFileWriter()
+
+            # output pdf file name
+            outputpdf = filename.split('.pdf')[0] + str(i) + '.pdf'
+
+            # adding pages to pdf writer object
+            for page in range(start, end):
+                pdfWriter.addPage(pdfReader.getPage(page))
+
+            # writing split pdf pages to pdf file
+            with open('./split/'+outputpdf, "wb") as f:
+                pdfWriter.write(f)
+
+            # interchanging page split start position for next split
+            start = end
+            try:
+                # setting split end position for next split
+                end = int(to_page)+1
+            except IndexError:
+                # setting split end position for last split
+                end = pdfReader.numPages
+
+        # closing the input pdf file object
+        pdfFileObj.close()
+        return filename.split('.pdf')[0] + '1.pdf'
+
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+
+########################################################################################################################
 # Rotate
 ########################################################################################################################
 
