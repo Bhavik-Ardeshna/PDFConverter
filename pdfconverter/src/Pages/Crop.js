@@ -126,21 +126,21 @@ export const Crop = () => {
         open
     } = useDropzone({ accept: '.pdf', noClick: true, noKeyboard: true });
 
-    // const onPreview = async e => {
-    //     try {
-    //         axios.get('/crop/upload/preview/' + returnPreviewImg, {
-    //             responseType: 'blob',
-    //         }).then(res => {
-    //             console.log(res.data)
-    //             const url = URL.createObjectURL(res.data);
-    //             setPreviewImg(url)
-    //             setFlag(true)
-    //             console.log(previewImg)
-    //         });
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    const onPreview = async e => {
+        try {
+            axios.get('/crop/upload/preview/' + returnPreviewImg, {
+                responseType: 'blob',
+            }).then(res => {
+                console.log(res.data)
+                const url = URL.createObjectURL(res.data);
+                setPreviewImg(url)
+                setFlag(true)
+                console.log(previewImg)
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     const style = useMemo(() => ({
         ...baseStyle,
